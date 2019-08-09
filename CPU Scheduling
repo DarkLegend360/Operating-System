@@ -1,0 +1,176 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+void main()
+{
+    int n,AT[20],BT[20],BTx[20],PR[20],CT[20],TAT[20],WT[20],Seek,TT=0,ch;
+    float ATAT=0,AWT=0;
+    printf("Enter No Of Processes:");
+    scanf("%d",&n);
+    for(int i=0;i<n;i++)
+    {
+        printf("Enter Arrival Time[P%d]:",i);scanf("%d",&AT[i]);
+        printf("Enter Burst Time[P%d]:",i);scanf("%d",&BTx[i]);
+        TT+=BTx[i];
+        printf("Enter Priority[P%d]:",i);scanf("%d",&PR[i]);
+    }
+    while(1)
+    {
+        printf("|-----------MENU------------|");
+        printf("\n1.FCFS\n2.SJF\n3.SRTF\n4.RR\n5.Priority(Preemtive)\n6.Priority(Non-Preemtive)\n7.Exit\n");
+        printf("|---------------------------|\n");
+        printf("Choice:");
+        scanf("%d",&ch);
+        Seek=0;
+        for(int i=0;i<n;i++)
+            BT[i]=BTx[i];
+        switch(ch)
+        {
+            case 1:
+            {
+                for(int i=0;Seek<TT;i++)
+                {
+                    if(AT[i]<=Seek)
+                    {
+                        Seek+=BT[i];
+                        CT[i]=Seek;
+                    }
+                }
+                break;
+            }
+            case 2:
+            {
+                int index,j,min;
+                while(Seek<TT)
+                {
+                    min=INT_MAX;
+                    for(j=0;j<n;j++)
+                        if(min>=BT[j] && AT[j]<=Seek && BT[j]!=0)
+                        { min=BT[j];index=j;}
+                    Seek+=BT[index];
+                    BT[index]=0;
+                    if(BT[index]==0)
+                        CT[index]=Seek;
+                }
+                break;
+            }
+            case 3:
+            {
+                int index,j,min;
+                while(Seek<=TT)
+                {
+                    min=BT[0];
+                    for(j=0;j<n;j++)
+                        if(min>=BT[j] && AT[j]<=Seek && BT[j]!=0)
+                        { min=BT[j];index=j;}
+                    Seek++;
+                    BT[index]--;
+                    if(BT[index]==0)
+                        CT[index]=Seek;
+                }
+                break;
+            }
+            case 4:
+            {
+                int TS,i,F=0,R=1,Queue[40],flag[20];
+                for(int j=0;j<20;j++)
+                    flag[j]=0;
+                Queue[0]=0;
+                printf("Enter Time Slice:");
+                scanf("%d",&TS);
+                while(Seek<=TT && F!=R)
+                {
+                    i=Queue[F++];
+                    if(AT[i]<=Seek)
+                    {
+                        if(BT[i]>TS)
+                        {   
+                            BT[i]-=4;
+                            Seek+=4;
+                        }
+                        else
+                        {
+                            Seek+=BT[i];
+                            BT[i]=0;
+                        }
+                        for(int j=i+1;j<n && AT[j]<=Seek;j++)
+                        {
+                            if(BT[j]!=0 && flag[j]==0)
+                            {
+                                flag[j]=1;
+                                Queue[R++]=j;
+                            }
+                        }
+                        if(BT[i]==0)
+                            CT[i]=Seek;
+                        else
+                            Queue[R++]=i;
+                    }
+                }       
+                break;
+            }
+            case 5:
+            {
+                int min,i=0;
+                while(Seek<TT)
+                {
+                    while(BT[i]>0)
+                    {
+                        BT[i]--;
+                        Seek++;
+                        if(Seek==AT[i+1]) break;
+                    }
+                    if(BT[i]==0)
+                        CT[i]=Seek;
+                    min=INT_MAX;
+                    for(int j=0;j<n && AT[j]<=Seek;j++)
+                    {
+                        if(PR[j]<min && BT[j]!=0)
+                        {
+                            min=PR[j];
+                            i=j;
+                        }
+                    }
+                }
+                break;
+            }
+            case 6:
+            {
+                int min,i=0;
+                while(Seek<TT)
+                {
+                    min=INT_MAX;
+                    for(int j=0;j<n && AT[j]<=Seek;j++)
+                    {
+                        if(PR[j]<min && BT[j]!=0)
+                        {
+                            min=PR[j];
+                            i=j;
+                        }
+                    }
+                    if(BT[i]>0)
+                    {
+                        Seek+=BT[i];
+                        BT[i]=0;
+                        CT[i]=Seek;
+                    }
+                }
+                break;
+            }
+            case 7: exit(0);
+            default:
+                printf("Invalid Option.");
+        }
+        printf("\nProcess\tAT\tBT\tCT\tTAT\tWT\tPr");
+        ATAT=0,AWT=0;
+        for(int i=0;i<n;i++)
+        {
+            TAT[i]=CT[i]-AT[i];
+            WT[i]=TAT[i]-BTx[i];
+            ATAT+=TAT[i];
+            AWT+=WT[i];
+            printf("\nP%d\t%d\t%d\t%d\t%d\t%d\t%d",i,AT[i],BTx[i],CT[i],TAT[i],WT[i],PR[i]);
+        }
+        printf("\nAverage Turn Around Time:%.2f\nAverage Waiting Time:%.2f\n",ATAT/n,AWT/n);
+    }
+}
