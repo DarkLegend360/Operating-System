@@ -85,8 +85,8 @@ void main()
                     {
                         if(BT[i]>TS)
                         {   
-                            BT[i]-=4;
-                            Seek+=4;
+                            BT[i]-=TS;
+                            Seek+=TS;
                         }
                         else
                         {
